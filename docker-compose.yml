@@ -9,6 +9,7 @@ services:
     volumes:
       - /var/run/docker.sock:/tmp/docker.sock:ro
       - ./certs:/etc/nginx/certs
+      - ./config/settings.conf:/etc/nginx/conf.d/nginx.conf:ro
     networks:
       red:
         ipv4_address: 10.3.0.1
