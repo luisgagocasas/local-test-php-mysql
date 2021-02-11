@@ -1,0 +1,99 @@
+version: '3.7'
+
+services:
+  proxy:
+    image: jwilder/nginx-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./certs:/etc/nginx/certs
+    networks:
+      red:
+        ipv4_address: 10.3.0.1
+
+  web:
+    image: crunchgeek/nginx-pagespeed:1.17.3-r1
+    container_name: web
+    hostname: nginx
+    working_dir: /var/www/html
+    restart: always
+    volumes:
+      - ./app:/var/www/html:ro
+      - ./config:/config
+    depends_on:
+      - php
+      - mysql
+    networks:
+      red:
+        ipv4_address: 10.3.0.2
+    environment:
+      VIRTUAL_HOST: ${DOMAIN}
+    env_file: nginx.env
+
+  php:
+    image: crunchgeek/php-fpm:7.3-r7
+    working_dir: /var/www/html
+    hostname: php-fpm
+    container_name: php-fpm
+    networks:
+      red:
+        ipv4_address: 10.3.0.3
+    volumes:
+      - ./app:/var/www/html
+      - ./config:/config
+    env_file: php-fpm.env
+
+  mysql:
+    image: mysql:8.0.20
+    restart: always
+    container_name: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_DATABASE: ${MYSQL_DB}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "3306:3306"
+    networks:
+      red:
+        ipv4_address: 10.3.0.4
+    volumes:
+      - ./mysql:/var/lib/mysql
+    cap_add:
+      - SYS_NICE
+
+  mailhog:
+    image: mailhog/mailhog
+    container_name: mailhog
+    networks:
+      red:
+        ipv4_address: 10.3.0.5
+    environment:
+      VIRTUAL_HOST: mail.${DOMAIN}
+      VIRTUAL_PORT: 8025
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpMyadmin
+    depends_on:
+      - mysql
+    networks:
+      red:
+        ipv4_address: 10.3.0.6
+    environment:
+      VIRTUAL_HOST: pma.${DOMAIN}
+      PMA_ARBITRARY: 1
+      PMA_HOST: mysql
+      PMA_USER: root
+      PMA_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - ./config/php.ini:/usr/local/etc/php/php.ini
+
+networks:
+  red:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.3.0.0/8

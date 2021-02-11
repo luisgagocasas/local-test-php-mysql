@@ -1,0 +1,7 @@
+certs/*.crt
+certs/*.key
+app/*
+!app/.gitkeep
+.env
+mysql/*
+!mysql/.gitkeep

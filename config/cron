@@ -1,0 +1,2 @@
+# * * * * * root echo "hola amigos x3" > /var/www/html/saludar.txt
+* * * * * root /usr/local/bin/php -q /var/www/html/cron.php
