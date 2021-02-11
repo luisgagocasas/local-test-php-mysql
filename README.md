@@ -1,7 +1,6 @@
 # Local Test: nginx-proxy php mysql phpmyadmin nginx
 
 Structure to perform tests locally with php and mysql and email reception.
-
 ## List Software
 
 - jwilder/nginx-proxy
@@ -16,6 +15,11 @@ An example of generating SSL certs with `mkcert` is available by running:
 
 `./certgen.sh`
 
+## Config
+
+`cp .env_example .env`
+
+Note: change values.
 
 ## Run
 
